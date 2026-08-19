@@ -78,14 +78,16 @@ curl -sS http://127.0.0.1:8000/v1/models
 curl -sS http://127.0.0.1:8000/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -d '{
-    "model":"ornith-ai/Ornith-1.5-35B-A3B-NVFP4",
-    "max_tokens":64,
-    "messages":[{"role":"user","content":"Reply with exactly: pong"}],
-    "chat_template_kwargs":{"enable_thinking":false}
+    "model": "ornith-ai/Ornith-1.5-35B-A3B-NVFP4",
+    "messages": [{"role":"user","content":"Reply with exactly: pong"}],
+    "max_tokens": 128,
+    "temperature": 0,
+    "thinking": false,
+    "chat_template_kwargs": {"enable_thinking": false}
   }'
 ```
 
-Expected: HTTP 200, `content` = `pong`, `system_fingerprint` starts `vllm-0.27.1-`.
+Expected: HTTP 200, `content` = `pong`, `reasoning` null, `finish_reason=stop`, `system_fingerprint` starts `vllm-0.27.1-`. Both `thinking:false` and `enable_thinking:false` are required. `max_tokens:64` without temperature can return null content.
 
 ### Non-fatal load warnings
 
@@ -111,7 +113,7 @@ One bench at a time. Serve is `--max-num-seqs 4`. Random dataset. Server-side de
 
 Copy concurrency exactly. Inf + 20 prompts ≠ max-concurrency 1 ≠ 2 ≠ 4. TTFT moves by two orders of magnitude.
 
-Prefix-cache hit rate stayed 0.0 on random prompts. Do not claim a KV hit rate from this set.
+Do not claim a KV hit rate from this set. `vllm:prefix_cache_hits_total` is unchecked.
 
 ---
 
@@ -517,7 +519,7 @@ Mem:           121Gi        59Gi        36Gi       106Mi        26Gi        61Gi
 Swap:           15Gi       1.7Gi        14Gi
 ```
 
-Prefix-cache hit rate stayed 0.0 on random prompts (`vllm:prefix_cache_hits_total` 0.0).
+`vllm:prefix_cache_hits_total` unchecked.
 
 ## Replicate checklist
 
